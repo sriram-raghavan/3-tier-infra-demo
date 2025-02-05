@@ -1,0 +1,80 @@
+Tools used - Linux, AWS (Route53, Certificate Manager, SNS Topics, IAM Roles, EC2, Systems Manager, S3 buckets, Load Balancer, VPC, NAT Gateway, CloudWatch, 
+), Terraform, Jenkins, Ansible, GitHub, Apache Tomcat, Maven, MySQL DB, Git, Nginx
+
+Platform Setup -
+----------------
+Nginx reverse proxy server -
+amazon-linux-extras list | grep nginx
+amazon-linux-extras install nginx1
+systemctl enable nginx
+yum install awscli
+amazon-linux-extras list | grep ansible
+amazon-linux-extras install ansible2
+yum install amazon-ssm-agent
+
+Create AMI copy using this EC2 instance
+
+App server -
+yum search java
+yum search java | grep 1.8
+yum install java-1.8.0-openjdk-devel -y
+amazon-linux-extras install ansible2
+cd /opt
+wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.98/bin/apache-tomcat-9.0.98.tar.gz
+tar -xvzf apache-tomcat-9.0.98.tar.gz
+mv apache-tomcat-9.0.98 tomcat
+
+Create AMI copy using this EC2 instance
+
+VPC network is not part of our 3 tier architecture
+
+Create eos-user, Attach policy - AdministratorAccess
+Generate Access Key for this user - CLI method
+
+In local machine execute aws configure for getting programmatic access to AWS.
+
+Execute terraform scripts and store the state file in the S3 backend. S3 bucket and DynamoDB to hold the lock state.
+
+Execute terraform scripts in the order - 1) backend 2) VPC
+
+Create AWS common resources - not part of 3 tier architecture as they are common and can be used in other application projects too.
+S3 bucket - store dynamic configuration that we are going to download in the user data section when EC2 instances are being launched using autoscaling group
+IAM role - attached to EC2 instances
+SNS topic - to send alerts
+Key pair - to be associated with EC2 instances as part of the launch template creation process
+RDS secrets - in the secrets manager to store the RDS database secrets
+
+Create S3 bucket - "ed-eos-web-data" with ACL's enabled (Choose "ed-eos-web-data-v1" is not available)
+
+Create SNS topic - "ed-web-alerts"
+
+Create a key pair - "ed-eos-key"
+
+Create an IAM role - "ed-eos-ec2-global-role" (Type - AWS Service, Use Case - EC2, Policy - AdministratorAccess)
+
+Create new secret - "ed-eos-rds-v1" (Other type of secret, key/value - (username-dbadmin, password-dbadmin123))
+
+Route53 - edshopper.com
+
+Setup a build server - 
+Create an EC2 instance "build-server"
+yum search java
+yum search java | grep 1.8
+yum install java-1.8.0-openjdk-devel -y
+cd /opt
+wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
+tar -xvzf apache-maven-3.9.9-bin.tar.gz
+mv apache-maven-3.9.9-bin maven
+export PATH=$PATH:/opt/maven/bin
+cd /
+mvn --version
+yum install git
+git clone https://bitbucket.org/dptrealtime/java-login-app.git
+cd java-login-app
+mvn package
+After build is successful -
+cd target
+aws configure
+
+Terraform Automation -
+----------------------

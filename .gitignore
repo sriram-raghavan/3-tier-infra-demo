@@ -1,0 +1,19 @@
+# Ignore .ppk files
+*.ppk
+
+# Ignore .csv files
+*.csv
+
+# Ignore Terraform lock file
+backend/.terraform.lock.hcl
+vpc/vpc/.terraform.lock.hcl
+
+# Ignore Terraform state files
+backend/*.tfstate
+backend/*.tfstate.*
+vpc/vpc/*.tfstate
+vpc/vpc/*.tfstate.*
+
+# Ignore Terraform folders
+backend/.terraform/
+vpc/vpc/.terraform/
